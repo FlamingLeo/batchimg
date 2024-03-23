@@ -892,8 +892,18 @@ def start_processing():
     global THREAD_COUNT, IMG_COUNT, ERR_COUNT
     IMG_COUNT = 0
     ERR_COUNT = 0
-    in_directory = os.fsencode(INPUT_PATH)
-    out_directory = os.fsencode(OUTPUT_PATH)
+    in_directory = ""
+    out_directory = ""
+
+    try:
+        in_directory = os.fsencode(INPUT_PATH)
+        out_directory = os.fsencode(OUTPUT_PATH)
+    except Exception as e:
+        insert_log(f"[ERROR] {str(e)}")
+        THREAD_COUNT = 0 if THREAD_COUNT < 0 else (THREAD_COUNT - 1)
+        log_active_label.config(text=f"Active Threads: {THREAD_COUNT}")
+        return
+
     in_files = []
     out_files = []
 
@@ -901,11 +911,16 @@ def start_processing():
     insert_log(LOG_SEPARATOR)
 
     # create directories if they do not exist
-    if not os.path.exists(in_directory):
-        os.makedirs(in_directory)
-
-    if not os.path.exists(out_directory):
-        os.makedirs(out_directory)
+    try:
+        if not os.path.exists(in_directory):
+            os.makedirs(in_directory)
+        if not os.path.exists(out_directory):
+            os.makedirs(out_directory)
+    except Exception as e:
+        insert_log(f"[ERROR] {str(e)}")
+        THREAD_COUNT = 0 if THREAD_COUNT < 0 else (THREAD_COUNT - 1)
+        log_active_label.config(text=f"Active Threads: {THREAD_COUNT}")
+        return
 
     # check if any file has the same name and warn user if override checkbox not checked
     for file in os.listdir(in_directory):
