@@ -900,6 +900,13 @@ def start_processing():
     insert_log("[INFO] Started processing job.")
     insert_log(LOG_SEPARATOR)
 
+    # create directories if they do not exist
+    if not os.path.exists(in_directory):
+        os.makedirs(in_directory)
+
+    if not os.path.exists(out_directory):
+        os.makedirs(out_directory)
+
     # check if any file has the same name and warn user if override checkbox not checked
     for file in os.listdir(in_directory):
         in_files.append(os.fsdecode(os.path.splitext(
