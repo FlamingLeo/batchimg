@@ -890,6 +890,9 @@ def start_processing():
     Optionally, log statistics for each image post-modification in an associated .txt file. 
     """
     global THREAD_COUNT, IMG_COUNT, ERR_COUNT
+    INPUT_PATH = general_input_entry.get()
+    OUTPUT_PATH = general_output_entry.get()
+
     IMG_COUNT = 0
     ERR_COUNT = 0
     in_directory = ""
