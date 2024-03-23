@@ -5,6 +5,8 @@ A batch image processor, written in Python using Pillow and tkinter.
 - Install Pillow: `pip install pillow`
 - Run the application: `python3 main.py`
 
+You must also make sure that Idlelib is available on your machine.
+
 # Help
 To use BatchIMG, you must first select a valid input (source) and a valid output (destination) directory. Your source directory will contain the images to operate on. You may select multiple effects and transformation options, if they are compatible with one another, as represented by a possible error message. To learn the syntax / meaning of each option, hover your mouse over the corresponding label.
 
