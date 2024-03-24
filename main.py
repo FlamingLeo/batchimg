@@ -925,7 +925,7 @@ def start_processing():
         log_active_label.config(text=f"Active Threads: {THREAD_COUNT}")
         return
 
-    # check if any file has the same name and warn user if override checkbox not checked
+    # check if any file has the same name and warn user if overwrite checkbox not checked
     for file in os.listdir(in_directory):
         in_files.append(os.fsdecode(os.path.splitext(
             os.path.basename(file))[0]).lower().strip())
@@ -934,8 +934,8 @@ def start_processing():
         out_files.append(os.fsdecode(os.path.splitext(
             os.path.basename(file))[0]).lower().strip())
 
-    if not set(in_files).isdisjoint(out_files) and not general_override.get():
-        if not messagebox.askokcancel("Override Images?", "At least one image has the same name in the output directory.\nAre you sure you want to override these files?"):
+    if not set(in_files).isdisjoint(out_files) and not general_overwrite.get():
+        if not messagebox.askokcancel("Overwrite Images?", "At least one image has the same name in the output directory.\nAre you sure you want to overwrite these files?"):
             insert_log("[INFO] Aborted processing job.")
             THREAD_COUNT = 0 if THREAD_COUNT < 0 else (THREAD_COUNT - 1)
             log_active_label.config(text=f"Active Threads: {THREAD_COUNT}")
@@ -1136,10 +1136,10 @@ log_rightclickmenu.add_command(
 log_listbox.bind(
     "<Button-3>", lambda e: log_rightclickmenu.tk_popup(e.x_root, e.y_root))
 
-general_override = IntVar(value=0)
+general_overwrite = IntVar(value=0)
 
 log_info_checkbox = ttk.Checkbutton(
-    log_frame, text="Override Without Asking", variable=general_override)
+    log_frame, text="Overwrite Without Asking", variable=general_overwrite)
 log_info_checkbox.pack(padx=5, side=LEFT)
 
 log_active_label = ttk.Label(log_frame, text=f"Active Threads: {THREAD_COUNT}")
