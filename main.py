@@ -7,7 +7,8 @@ import threading
 import os
 import re
 
-VERSION = "1.0"
+VERSION = "1.0_01"
+DATE = "27.03.2024"
 LOG_SEPARATOR = "---------------------------------------------------------------------"
 CWD = os.path.abspath(os.getcwd()).replace(os.sep, '/')
 INPUT_PATH = os.path.join(CWD, 'input').replace(os.sep, '/')
@@ -145,7 +146,7 @@ def about():
     messagebox.showinfo(
         "About BatchIMG", "BatchIMG: A GUI for image batch processing.\n" +
         "Developed by FlamingLeo, 2024.\n\n" +
-        f"Version {VERSION}, finished 23.03.2024.\nMade using Python, Pillow and tkinter.\n\n" +
+        f"Version {VERSION}, finished {DATE}.\nMade using Python, Pillow and tkinter.\n\n" +
         "PyPI (Pillow): \nhttps://pypi.org/project/pillow/")
 
 
@@ -171,9 +172,13 @@ def save_logs():
     """
     Saves the logs to an external text file in the same directory as the program.
     """
-    with open("logs.txt", "w") as file:
-        for listbox_entry in enumerate(log_listbox.get(0, END)):
-            file.write(listbox_entry[1] + "\n")
+    try: 
+        if log_listbox.size():
+            with open("logs.txt", "w") as file:
+                for listbox_entry in enumerate(log_listbox.get(0, END)):
+                    file.write(listbox_entry[1] + "\n")
+    except:
+        pass
 
 
 def set_input_path():
