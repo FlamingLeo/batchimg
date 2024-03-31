@@ -477,7 +477,7 @@ def func_transform_resize(img):
                     return img
                 if resize_input[0].isnumeric() and resize_input[1].isnumeric():
                     new_width = int(resize_input[0])
-                    new_height = int(resize_input[0])
+                    new_height = int(resize_input[1])
                 else:
                     insert_log(
                         "[WARN] Invalid resize parameter(s). No resizing performed.")
@@ -500,7 +500,7 @@ def func_transform_resize(img):
                     return img
                 if resize_input[0].isnumeric() and resize_input[1].isnumeric():
                     new_width = int(resize_input[0])
-                    new_height = int(resize_input[0])
+                    new_height = int(resize_input[1])
                 else:
                     insert_log(
                         "[WARN] Invalid resize parameter(s). No resizing performed.")
