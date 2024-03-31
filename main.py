@@ -7,9 +7,8 @@ import threading
 import os
 import re
 
-VERSION = "1.0_01"
-DATE = "27.03.2024"
-LOG_SEPARATOR = "---------------------------------------------------------------------"
+VERSION = "1.1"
+DATE = "31.03.2024"
 CWD = os.path.abspath(os.getcwd()).replace(os.sep, '/')
 INPUT_PATH = os.path.join(CWD, 'input').replace(os.sep, '/')
 OUTPUT_PATH = os.path.join(CWD, 'output').replace(os.sep, '/')
@@ -172,7 +171,7 @@ def save_logs():
     """
     Saves the logs to an external text file in the same directory as the program.
     """
-    try: 
+    try:
         if log_listbox.size():
             with open("logs.txt", "w") as file:
                 for listbox_entry in enumerate(log_listbox.get(0, END)):
@@ -444,7 +443,10 @@ def func_transform_resize(img):
     Resizes image based on input and resampling selection.
     Returns resized image if entry has valid pattern, otherwise returns unmodified image.
     """
-    new_size = transform_resize_entry.get()
+    input = transform_resize_entry.get()
+    greater_than = input.split(">")
+    less_than = input.split("<")
+    new_size = greater_than[0] if len(greater_than) == 2 else less_than[0]
 
     # check if resizing regex matches input, otherwise don't resize
     if RESIZE_REGEX.match(new_size):
@@ -465,6 +467,53 @@ def func_transform_resize(img):
             return img
 
         # resize based on radio button value (0: contain, 1: cover, 2: fit, 3: pad)
+        # also check if greater than / less than dimensions have been specified and fit
+        if len(greater_than) == 2:
+            if RESIZE_REGEX.match(greater_than[1]):
+                resize_input = greater_than[1].split("x")
+                if len(resize_input) != 2:
+                    insert_log(
+                        "[WARN] Invalid resize parameter(s). No resizing performed.")
+                    return img
+                if resize_input[0].isnumeric() and resize_input[1].isnumeric():
+                    new_width = int(resize_input[0])
+                    new_height = int(resize_input[0])
+                else:
+                    insert_log(
+                        "[WARN] Invalid resize parameter(s). No resizing performed.")
+                    return img
+                if img.width < new_width or img.height < new_height:
+                    insert_log(
+                        f"[INFO] Image dimension(s) less than {new_width}x{new_height}. Skipping.")
+                    return img
+            else:
+                insert_log(
+                    "[WARN] Invalid resize parameter(s). No resizing performed.")
+                return img
+
+        elif len(less_than) == 2:
+            if RESIZE_REGEX.match(less_than[1]):
+                resize_input = less_than[1].split("x")
+                if len(resize_input) != 2:
+                    insert_log(
+                        "[WARN] Invalid resize parameter(s). No resizing performed.")
+                    return img
+                if resize_input[0].isnumeric() and resize_input[1].isnumeric():
+                    new_width = int(resize_input[0])
+                    new_height = int(resize_input[0])
+                else:
+                    insert_log(
+                        "[WARN] Invalid resize parameter(s). No resizing performed.")
+                    return img
+                if img.width > new_width or img.height > new_height:
+                    insert_log(
+                        f"[INFO] Image dimension(s) greater than {new_width}x{new_height}. Skipping.")
+                    return img
+            else:
+                insert_log(
+                    "[WARN] Invalid resize parameter(s). No resizing performed.")
+                return img
+
         resize_method = RESAMPLING.index(transform_resize_resample.get())
         match transform_resize_type.get():
             case 0:
@@ -548,7 +597,7 @@ def func_transform_expand(img):
     Returns expanded image if input is valid, otherwise returns original image.
     """
     border = transform_expand_entry.get()
-    if border.isdigit():
+    if border.isnumeric():
         img = ImageOps.expand(img, int(border), FILL_COLOR)
         insert_log(
             f"[TRANSFORM] Expanded image by {border} pixels with color {FILL_COLOR}.")
@@ -613,7 +662,7 @@ def func_transform_posterize(img):
     Returns posterized image or original image if argument is invalid.
     """
     bits = transform_posterize_entry.get()
-    if bits.isdigit() and int(bits) > 0 and int(bits) < 9:
+    if bits.isnumeric() and int(bits) > 0 and int(bits) < 9:
         img = ImageOps.posterize(img, int(bits))
         insert_log(f"[TRANSFORM] Posterized image, kept {bits} bit(s).")
     else:
@@ -628,7 +677,7 @@ def func_transform_solarize(img):
     Returns solarized image or original image if argument is invalid.
     """
     threshold = transform_solarize_entry.get()
-    if threshold.isdigit() and int(threshold) >= 0:
+    if threshold.isnumeric() and int(threshold) >= 0:
         img = ImageOps.solarize(img, int(threshold))
         insert_log(f"[TRANSFORM] Solarized image with threshold {threshold}.")
     else:
@@ -916,7 +965,6 @@ def start_processing():
     out_files = []
 
     insert_log("[INFO] Started processing job.")
-    insert_log(LOG_SEPARATOR)
 
     # create directories if they do not exist
     try:
@@ -993,7 +1041,6 @@ def start_processing():
         except Exception as e:
             insert_log(f"[ERROR] {str(e)}")
             ERR_COUNT += 1
-        insert_log(LOG_SEPARATOR)
 
     insert_log(
         f"[INFO] Finished processing {IMG_COUNT} images with {ERR_COUNT} error(s).")
@@ -1188,7 +1235,7 @@ transform_resize_checkbutton = ttk.Checkbutton(
     transform_img_frame, text="Resize", variable=transform_resize, command=ui_toggle_resize)
 transform_resize_checkbutton.grid(padx=5, sticky=W, row=0, column=0)
 transform_resize_tooltip = Hovertip(
-    transform_resize_checkbutton, "Possible Formats (interchangable):\n- Percentage (n%, e.g. 50%)\n- Dimensions (SIZExSIZE, e.g. 100x150)\n- Both (e.g. 50%x100)")
+    transform_resize_checkbutton, "Possible Formats (interchangable):\n- Percentage (n%, e.g. 50%)\n- Dimensions (SIZExSIZE, e.g. 100x150)\n- Both (e.g. 50%x100)\n\nYou may also specify minimum / maximum\ndimensions for resizing with '>' or '<'.\n- '>': Resize only if image is bigger than nxn.\n e.g. 50%>200x200 will halve the image if it's bigger than 200x200.\n- '<': Resize only if image is smaller than nxn.\n e.g. 200%<200x200 will double the image if it's smaller than 200x200.")
 
 transform_resize_entry = ttk.Entry(
     transform_img_frame, width=25)
